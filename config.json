@@ -1,0 +1,8 @@
+{
+  "MailSettings": {
+    "ToAddress": "atchison06@gmail.com"
+  },
+  "ConnectionStrings": {
+    "AlexisAtchisonContextConnectionWin": "Server=(localdb)\\MSSQLLocalDb;Database=AlexisAtchison;Trusted_Connection=true;MultipleActiveResultSets=true;"
+  }
+}

@@ -1,0 +1,112 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+
+<h3>Property Listings</h3>
+<div ng-controller="AppController" ng-cloak>
+    <div class="row">
+        <div class="col-md-12">
+            Find by name: <input type="search" ng-model="query" class="form-control" /><br /><br />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-1">
+            <strong>ID</strong>
+        </div>
+        <div class="col-md-2">
+            <strong>Title</strong>
+        </div>
+        <div class="col-md-1">
+            <strong>Zip Code</strong>
+        </div>
+        <div class="col-md-2">
+            <strong>Number of Bedrooms</strong>
+        </div>
+        <div class="col-md-1">
+            <strong>Sale Price</strong>
+        </div>
+        <div class="col-md-5">
+
+        </div>
+    </div>
+    <hr />
+    {{ status }}
+    <div class="row" ng-repeat="pl in propListings | filter:query">
+        <div class="row">
+            <div class="col-md-1">
+                {{ pl.id }}
+            </div>
+            <div class="col-md-2">
+                {{ pl.title }}
+            </div>
+            <div class="col-md-1">
+                {{ pl.zip }}
+            </div>
+            <div class="col-md-2">
+                {{ pl.numBedrooms }}
+            </div>
+            <div class="col-md-1">
+                {{ pl.salePrice | currency }}
+            </div>
+            <div class="col-md-5">
+                <a href="#" ng-click="pl.toggleInquire = !pl.toggleInquire" ng-if="pl.inquireMessage == undefined || pl.inquireMessage == ''">More Information</a>
+                <strong><em><span ng-if="pl.inquireMessage != undefined && p1.inquireMessage != ''">{{ pl.inquireMessage }}</span></em></strong>
+            </div>
+        </div>
+        <div class="row" ng-show="pl.toggleInquire">
+            <form name="myForm[index]">
+                <br />
+                <div class="col-md-1">&nbsp;</div>
+                <div class="col-md-4">
+                    Your Name: <input name="yourName" type="text" ng-model="yourName[index]" required class="form-control" /> <span ng-if="!myForm[index].yourName.$valid"><em><small>required</small></em></span>
+                </div>
+                <div class="col-md-4">
+                    Your Email: <input name="yourEmail" type="email" ng-model="yourEmail[index]" required class="form-control" /> <span ng-if="!myForm[index].yourEmail.$valid"><em><small>required</small></em></span>
+                </div>
+                <div class="col-md-1">
+                    <br />
+                    <input type="submit" value="Submit Lead" ng-click="inquire(yourName[index],yourEmail[index],pl)" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+        <hr />
+    </div>
+</div>
+
+<script>
+    var app = angular.module('myApp', []);
+    app.controller('AppController', function ($scope, $http) {
+        // get the list of properties when the page first loads
+        $http.get('/App/Property')
+            .then(function (response) {
+                $scope.propListings = response.data;
+            },
+            function (response) {
+                $scope.status = response.statusText;
+            });
+
+        // get blank list of inquiries
+        $scope.inquiries = [];
+
+        // save the lead
+        $scope.inquire = function (name, email, pl) {
+            var data = {
+                id: 0,
+                name: name,
+                email: email,
+                title: pl.title
+            };
+
+            $http.post('/App/Lead', data)
+                .then(function (response) {
+                    // hide form and show message
+                    pl.toggleInquire = false;
+                    pl.inquireMessage = 'Thank you! Your inquiry about ' + pl.title + ' has been submitted.';
+                },
+                function (response) {
+                    $scope.status = response.statusText;
+                });
+        };
+    });
+</script>
